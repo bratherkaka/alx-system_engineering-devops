@@ -1,4 +1,2 @@
-#i/bin/bash
+#!/bin/bash
 pwd
-0-current _working_directory
-
