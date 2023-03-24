@@ -1,3 +1,4 @@
-#!/usr/bin/env bash
-# Use a private
-ssh -i ~/.ssh/holberton ubuntu@34.74.70.205
+#!/bin/bash
+# This script connects to a remote server using the private key ~/.ssh/school and user ubuntu
+server_ip="108292-web-01"
+ssh -i ~/.ssh/school ubuntu@"$108292-web-01"
