@@ -1,4 +1,4 @@
-#!/bin/bash
-# This script connects to a remote server using the private key ~/.ssh/school and user ubuntu
-server_ip="108292-web-01"
-ssh -i ~/.ssh/school ubuntu@"$108292-web-01"
+#!/usr/bin/env bash
+# Connect to the server using the private key ~/.ssh/school with the user ubuntu
+
+ssh -i ~/.ssh/school ubuntu@35.174.176.249
