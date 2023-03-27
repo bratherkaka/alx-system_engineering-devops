@@ -1,14 +1,13 @@
-# Make passwordAuthentication and add new private key
-file_line { 'replace passwordAuthentication':
-  ensure  => 'present',
-  path    => '/etc/ssh/ssh_config',
-  replace => true,
-  line    => 'PasswordAuthentication no',
-  match   => 'PasswordAuthentication yes',
+file { '/etc/ssh/ssh_config':
+  ensure => file,
 }
 
-file_line { 'add the private key ~/.ssh/holberton':
-  ensure => 'present',
-  path   => '/etc/ssh/ssh_config',
-  line   => 'IdentityFile ~/.ssh/holberton',
+file_line { 'Turn off passwd auth':
+  path => '/etc/ssh/ssh_config',
+  line => 'PasswordAuthentication no',
+}
+
+file_line { 'Declare identity file':
+  path => '/etc/ssh/ssh_config',
+  line => 'IdentityFile ~/.ssh/school',
 }
