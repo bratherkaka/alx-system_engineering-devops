@@ -1,26 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Install and configure Nginx with a redirection rule
 
-# Update and install Nginx
-sudo apt-get update
-sudo apt-get install -y nginx
+# Update package list and install Nginx
+apt-get update
+apt-get -y install nginx
 
-# Start Nginx
-sudo service nginx start
+# Allow Nginx HTTP traffic through the firewall
+ufw allow 'Nginx HTTP'
 
-# Add redirection configuration
-sudo bash -c "cat > /etc/nginx/sites-available/redirection << EOL
-server {
-    listen 80;
-    server_name _;
+# Create a sample HTML page
+echo "Holberton School" > /var/www/html/index.nginx-debian.html
 
-    location /redirect_me {
-        return 301 https://www.example.com;
-    }
-}
-EOL"
+# Add a redirection rule for the /redirect_me path
+sed -i '/listen 80 default_server/a rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
 
-# Enable the new configuration
-sudo ln -s /etc/nginx/sites-available/redirection /etc/nginx/sites-enabled/
-
-# Reload Nginx to apply the changes
-sudo service nginx reload
+# Start the Nginx service
+service nginx start
