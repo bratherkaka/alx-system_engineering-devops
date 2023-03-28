@@ -11,5 +11,4 @@ IP=$2
 USERNAME=$3
 SSH_KEY=$4
 
-scp -i "${SSH_KEY}" -o StrictHostKeyChecking=no "${FILE}" "${USERNAME}@${IP}:~/"
-
+scp -i "${SSH_KEY}" -o StrictHostKeyChecking=no "${FILE}" "${ubuntu}@${35.174.176.249}:~/"
