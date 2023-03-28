@@ -1,8 +1,26 @@
-#!/usr/bin/env bash
-# Push from client a file
-apt-get update
-apt-get -y install nginx
-ufw allow 'Nginx HTTP'
-echo "Holberton School" > /var/www/html/index.nginx-debian.html
-sed -i '/listen 80 default_server/a rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
-service nginx start
+#!/bin/bash
+
+# Update and install Nginx
+sudo apt-get update
+sudo apt-get install -y nginx
+
+# Start Nginx
+sudo service nginx start
+
+# Add redirection configuration
+sudo bash -c "cat > /etc/nginx/sites-available/redirection << EOL
+server {
+    listen 80;
+    server_name _;
+
+    location /redirect_me {
+        return 301 https://www.example.com;
+    }
+}
+EOL"
+
+# Enable the new configuration
+sudo ln -s /etc/nginx/sites-available/redirection /etc/nginx/sites-enabled/
+
+# Reload Nginx to apply the changes
+sudo service nginx reload
