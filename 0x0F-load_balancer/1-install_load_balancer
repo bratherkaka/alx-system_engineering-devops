@@ -1,7 +1,40 @@
 #!/usr/bin/env bash
-# Install haproxy and config 2 server
-apt-get update
-apt-get -y install haproxy=1.6.\*
-echo "ENABLED=1" >> /etc/default/haproxy
-sed -i '/504.http/a \\nlisten http-in\n\tbind *:80\n\tmode http\n\tbalance roundrobin\n\tserver 1231-web-01 34.74.70.205:80 check\n\tserver 1231-web-02 34.224.30.177:80 check' /etc/haproxy/haproxy.cfg
-sudo service haproxy start
+# Configures HAproxy on Ubuntu 16.04 LTS for load balancing
+
+# Update package lists and install HAproxy
+sudo apt-get update
+sudo apt-get install -y haproxy
+
+# Configure HAproxy with round-robin load balancing
+sudo bash -c "cat > /etc/haproxy/haproxy.cfg << EOL
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+frontend http_front
+    bind *:80
+    default_backend http_back
+
+backend http_back
+    balance roundrobin
+    server web-01 35.174.176.249:80 check
+    server web-02 54.161.251.216:80 check
+EOL
+"
+
+# Enable and restart the HAproxy service
+sudo systemctl enable haproxy
+sudo systemctl restart haproxy
