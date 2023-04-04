@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Configures Nginx to add a custom header with the server's hostname
+# Configures Nginx to add a custom header with the server's hostname on Ubuntu 16.04 LTS
 
 # Update package lists and install Nginx
 sudo apt-get update
