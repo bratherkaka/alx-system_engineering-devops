@@ -1,23 +1,40 @@
-# Install and config the nginx
-exec { 'update':
-  command  => 'sudo apt-get update',
-  provider => shell,
-}
+#!/usr/bin/env bash
+# Configures HAproxy on Ubuntu 16.04 LTS for load balancing
 
-package { 'nginx':
-  ensure  => installed,
-  require => Exec['update'],
-}
+# Update package lists and install HAproxy
+sudo apt-get update
+sudo apt-get install -y haproxy
 
-file_line { 'headercustom':
-  ensure  => present,
-  path    => '/etc/nginx/sites-available/default',
-  after   => ':80 default_server;',
-  line    => "add_header X-Served-By ${hostname};",
-  require => Package['nginx'],
-}
+# Configure HAproxy with round-robin load balancing
+sudo bash -c "cat > /etc/haproxy/haproxy.cfg << EOL
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    user haproxy
+    group haproxy
+    daemon
 
-service { 'nginx':
-  ensure  => running,
-  require => File_line['headercustom'],
-}
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+frontend http_front
+    bind *:80
+    default_backend http_back
+
+backend http_back
+    balance roundrobin
+    server web-01 35.174.176.249:80 check
+    server web-02 54.161.251.216:80 check
+EOL
+"
+
+# Enable and restart the HAproxy service
+sudo systemctl enable haproxy
+sudo systemctl restart haproxy
