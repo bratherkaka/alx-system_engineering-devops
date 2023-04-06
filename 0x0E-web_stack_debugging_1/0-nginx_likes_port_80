@@ -1,4 +1,22 @@
 #!/usr/bin/env bash
-# Open the 80 port
-sed -i 's/8080/80/g' /etc/nginx/sites-enabled/default
-service nginx restart
+# This script configures Nginx to listen on port 80 of all the server's active IPv4 IPs
+
+# Check if Nginx is already listening on port 80
+sudo netstat -tuln | grep :80 > /dev/null
+if [ $? -eq 0 ]; then
+  echo "Nginx is already listening on port 80"
+  exit 0
+fi
+
+# Check the Nginx configuration files for any errors
+sudo nginx -t > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "There are errors in the Nginx configuration files"
+  exit 1
+fi
+
+# Modify the Nginx configuration file to listen on port 80
+sudo sed -i 's/listen 80 default_server;/listen 80;/' /etc/nginx/sites-available/default
+
+# Restart Nginx
+sudo service nginx restart
