@@ -1,16 +1,51 @@
-#!/usr/bin/env bash 
-# Display information about subdomains.
+frontend www-ssl
+    bind *:443 ssl crt /etc/ssl/certs/holberton.pem
+    mode http
+    option httplog
+    option forwardfor
+    reqadd X-Forwarded-Proto:\ https
+    default_backend www-backend
 
-subdomaininfo () {
-    dig "$1" | grep -A1 'ANSWER SECTION:' | tail -n 1 | sed -r "s/$1./$2/g" | sed -r "s/ /\t/g" | sed -r "s/\t/ /g" | awk '{ print "The subdomain " $1 " is a " $4 " record and points to "  $5 }'
-}
+backend www-backend
+    mode http
+    option httplog
+    option forwardfor
+    http-request set-header X-Client-IP %[src]
+    server server1 web-01:80 check
+    server server2 web-02:80 check
 
-if [ "$#" -eq 2 ]
-then
-    subdomaininfo "$2.$1" "$2"
-else
-    subdomaininfo "www.$1" "www"
-    subdomaininfo "lb-01.$1" "lb-01"
-    subdomaininfo "web-01.$1" "web-01"
-    subdomaininfo "web-02.$1" "web-02"
-fi
+frontend http
+    bind *:80
+    mode http
+    option httplog
+    option forwardfor
+    default_backend http-backend
+
+backend http-backend
+    mode http
+    option httplog
+    option forwardfor
+    http-request set-header X-Client-IP %[src]
+    server server1 web-01:80 check
+    server server2 web-02:80 check
+    http-response set-header Server Apache/2.4.10 (Debian)
+    http-response set-header X-Powered-By PHP/5.6.30-0+deb8u1
+    http-response set-header X-Served-By web-01
+    http-response set-header Connection Keep-Alive
+    http-response set-header Content-Length %[len]
+    http-response set-header Content-Type text/html; charset=UTF-8
+    http-response set-header Cache-Control private
+    http-response set-header Date %{date('D, d M Y H:i:s T')}
+    http-response set-header X-Frame-Options SAMEORIGIN
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection 1; mode=block
+    http-response set-header Referrer-Policy no-referrer-when-downgrade
+    http-response set-header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-Permitted-Cross-Domain-Policies none
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-Download-Options noopen
+    http-response set-header X-Frame-Options DENY
+    http-response set-header X-Content-Type-Options nosniff
+    http-response set-header X-XSS-Protection 1; mode=block
+    http-response set-header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.holbert
