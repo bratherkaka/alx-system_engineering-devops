@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-# Configure SSH to allow port forwarding
-sudo sed -i '/^#.*GatewayPorts/ s/^#//' /etc/ssh/sshd_config
-sudo sed -i '/^#.*AllowTcpForwarding/ s/^#//' /etc/ssh/sshd_config
-sudo systemctl reload ssh
+# Configure ufw to forward incoming traffic from port 8080/TCP to port 80/TCP
 
-# Allow incoming traffic on the port to be forwarded
-sudo ufw allow 8080/tcp
+# Set the default forward policy to ACCEPT
+sed -i 's/DEFAULT_FORWARD_POLICY="DROP"/DEFAULT_FORWARD_POLICY="ACCEPT"/g' /etc/default/ufw
 
-# Display forwarding rules
-echo "Forwarding from port 8080 to port 80 on web-01"
-echo "External IP: $(curl -s icanhazip.com)"
-echo "Internal IP: $(hostname -I | awk '{print $1}')"
+# Set the default input/output policies to DROP
+sed -i 's/DEFAULT_INPUT_POLICY="ACCEPT"/DEFAULT_INPUT_POLICY="DROP"/g' /etc/default/ufw
+sed -i 's/DEFAULT_OUTPUT_POLICY="ACCEPT"/DEFAULT_OUTPUT_POLICY="DROP"/g' /etc/default/ufw
 
-# Note: The router or firewall must also be configured to forward traffic on port 8080 to web-01
+# Add a rule to redirect incoming traffic from port 8080/TCP to port 80/TCP
+sed -i '1 i\-A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80' /etc/ufw/before.rules
+
+# Reload the ufw firewall
+ufw reload
