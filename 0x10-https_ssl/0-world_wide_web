@@ -1,43 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# This script displays information about the subdomains of a given domain
+domain=$1
+subdomain=$2
 
-# Check for correct number of arguments
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: $0 domain [subdomain]"
-  exit 1
-fi
-
-# Extract domain and subdomain arguments
-domain="$1"
-subdomain="${2:-}"
-
-# Define subdomains to check
-subdomains=("www" "lb-01" "web-01" "web-02")
-
-# Function to get DNS record info
-get_record_info() {
-  local subdomain="$1"
-  local domain="$2"
-  local record_type="$3"
-  local record_info="$(dig +short "$subdomain.$domain" "$record_type" | awk '{print $0}')"
-  if [[ -n "$record_info" ]]; then
-    echo "The subdomain $subdomain is a $record_type record and points to $record_info"
-  else
-    echo "No $record_type record found for subdomain $subdomain"
-  fi
-}
-
-# Check subdomain argument and display appropriate output
-if [[ -n "$subdomain" ]]; then
-  # Display info for specified subdomain
-  get_record_info "$subdomain" "$domain" "A"
+if [ -z "$subdomain" ]; then
+  subdomains=("www" "lb-01" "web-01" "web-02")
 else
-  # Display info for all subdomains
-  for subdomain in "${subdomains[@]}"; do
-    get_record_info "$subdomain" "$domain" "A"
-  done
+  subdomains=("$subdomain")
 fi
 
-# Display info for DNS TXT record
-get_record_info "$domain" "" "TXT"
+for sub in "${subdomains[@]}"; do
+  record=$(dig "$sub.$domain" +short)
+  type=$(dig "$sub.$domain" +short | awk '{print $2}')
+  echo "The subdomain $sub is a $type record and points to $record"
+done
